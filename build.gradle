@@ -61,3 +61,7 @@ dependencies {
 		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
 	}
 }
+
+application {
+	mainClassName = 'dev.weary.zomboid.Main'
+}
