@@ -31,3 +31,57 @@ task zomboidClasses(type: Sync) {
 }
 compileJava.dependsOn(zomboidClasses)
 classes.dependsOn(zomboidClasses)
+
+/**
+ * Create game launch run configuration.
+ * @param name run configuration name
+ */
+void createRunConfig(String name, ArrayList<String> format) {
+
+	// translate config name to filename (similar to what IDEA is doing)
+	def filename = name.replaceAll('\\s', '_').replaceAll('[^\\w_]', '').replaceAll("__", '_')
+
+	// write xml configuration to file
+	file("./.idea/runConfigurations/${filename}.xml").withWriter {
+		format.each { l -> it.writeLine(l) }
+	}
+}
+
+tasks.register('generateLaunchRunConfigs') {
+
+	it.description 'Create launch run configurations.'
+	it.group 'build setup'
+
+	it.onlyIf {
+		project.ext.has('gameDir')
+	}
+	createRunConfig('Launch Loader', [
+			'<component name=\"ProjectRunConfigurationManager\">',
+			'	<configuration default=\"false\" name=\"Launch Loader\" type=\"Application\"' +
+					' factoryName=\"Application\">',
+			'		<option name=\"MAIN_CLASS_NAME\" value=\"dev.weary.zomboid.Main\" />',
+			"		<module name=\"${rootProject.name}.main\" />",
+			"		<option name=\"PROGRAM_PARAMETERS\" value=\"--agent ${buildDir}/libs/${rootProject.name}-agent" +
+					".jar\" />",
+			'		<method v=\"2\">',
+			'			<option name=\"Make\" enabled=\"true\" />',
+			'		</method>',
+			'	</configuration>',
+			'</component>'
+	])
+	createRunConfig('Launch Zomboid', [
+			'<component name="ProjectRunConfigurationManager">',
+			'	<configuration default="false" name="Launch Zomboid" type="Application" factoryName="Application">',
+			'		<option name="MAIN_CLASS_NAME" value="zombie.gameStates.MainScreenState" />',
+			"		<module name=\"${rootProject.name}.main\" />",
+			'		<option name=\"VM_PARAMETERS\" value=\"-Ddebug=0 -Dzomboid.steam=1 -Dzomboid.znetlog=1 ' +
+					'-XX:+UseConcMarkSweepGC -XX:-CreateMinidumpOnCrash ' +
+					'-XX:-OmitStackTraceInFastThrow -Xms1800m -Xmx2048m\" />',
+			"		<option name=\"WORKING_DIRECTORY\" value=\"${gameDir}\" />",
+			'		<method v=\"2\">',
+			'			<option name=\"Make\" enabled=\"true\" />',
+			'		</method>',
+  			'	</configuration>',
+			'</component>'
+	])
+}
