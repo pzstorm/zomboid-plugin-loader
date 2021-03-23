@@ -13,3 +13,4 @@ Zomboid Plugin Loader is a Project Zomboid modding tool that allows users to loa
 
 - Run `generateLaunchRunConfigs` to generate run configurations.
 
+- Run `shadowJar` to generate the **agent** jar used by the loader.
