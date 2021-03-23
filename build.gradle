@@ -68,3 +68,8 @@ dependencies {
 application {
 	mainClassName = 'dev.weary.zomboid.Main'
 }
+
+shadowJar {
+	archiveClassifier.set('agent')
+}
+
