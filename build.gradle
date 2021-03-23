@@ -35,25 +35,26 @@ repositories {
 }
 
 configurations {
-	implementation.extendsFrom(zomboidImplementation)
 	runtimeOnly.extendsFrom(zomboidRuntimeOnly)
+	implementation.extendsFrom(coreImplementation, zomboidImplementation)
+	provided.extendsFrom(zomboidImplementat, zomboidRuntimeOnly)
 }
 
 dependencies {
 	// https://mvnrepository.com/artifact/org.ow2.asm/asm
-	implementation group: 'org.ow2.asm', name: 'asm', version: '9.0'
+	coreImplementation group: 'org.ow2.asm', name: 'asm', version: '9.0'
 
 	// https://mvnrepository.com/artifact/org.ow2.asm/asm-tree
-	implementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.0'
+	coreImplementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.0'
 
 	// https://mvnrepository.com/artifact/org.ow2.asm/asm-util
-	implementation group: 'org.ow2.asm', name: 'asm-util', version: '9.0'
+	coreImplementation group: 'org.ow2.asm', name: 'asm-util', version: '9.0'
 
 	// https://mvnrepository.com/artifact/org.ow2.asm/asm-analysis
-	implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.0'
+	coreImplementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.0'
 
 	// https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
-	implementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
+	coreImplementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
 
 	// Project Zomboid classes
 	if (project.ext.has('gameDir')) {
@@ -67,7 +68,7 @@ dependencies {
 	{
 		def toolsJar = Paths.get(jdkDir, 'lib', 'tools.jar')
 		if (toolsJar.toFile().exists()) {
-			implementation files(toolsJar)
+			coreImplementation files(toolsJar)
 		}
 		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
 	}
