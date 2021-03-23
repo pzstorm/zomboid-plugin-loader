@@ -23,3 +23,6 @@
 # Gradle
 **/gradle.xml
 **/libraries
+
+# Other
+/jarRepositories.xml
