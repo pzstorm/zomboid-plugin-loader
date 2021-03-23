@@ -60,14 +60,14 @@ tasks.register('generateLaunchRunConfigs') {
 	it.onlyIf {
 		project.ext.has('gameDir')
 	}
+	def agentJarPath = "${buildDir}/libs/${rootProject.name}-${rootProject.version}-agent.jar"
 	createRunConfig('Launch Loader', [
 			'<component name=\"ProjectRunConfigurationManager\">',
 			'	<configuration default=\"false\" name=\"Launch Loader\" type=\"Application\"' +
 					' factoryName=\"Application\">',
 			'		<option name=\"MAIN_CLASS_NAME\" value=\"dev.weary.zomboid.Main\" />',
 			"		<module name=\"${rootProject.name}.main\" />",
-			"		<option name=\"PROGRAM_PARAMETERS\" value=\"--agent ${buildDir}/libs/${rootProject.name}-agent" +
-					".jar\" />",
+			"		<option name=\"PROGRAM_PARAMETERS\" value=\"--agent ${agentJarPath}\" />",
 			'		<method v=\"2\">',
 			'			<option name=\"Make\" enabled=\"true\" />',
 			'		</method>',
