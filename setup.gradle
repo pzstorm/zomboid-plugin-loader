@@ -1,0 +1,19 @@
+Properties localProperties = new Properties()
+project.ext.localProperties = localProperties
+
+def propertiesFile = rootDir.toPath().resolve('local.properties').toFile()
+if (propertiesFile.exists())
+{
+	propertiesFile.withDataInputStream {
+		localProperties.load(it)
+	}
+	localProperties.entrySet().each {
+		String[] property = [ it.getKey(), it.getValue() ]
+		project.ext.setProperty(property[0], property[1])
+		logger.info("Added project property ${property[0]}:${property[1]}")
+	}
+}
+else if (!propertiesFile.createNewFile()) {
+	throw new GradleException('Unable to create local.properties file in root directory')
+}
+else logger.warn('WARN: Empty local properties file created')
