@@ -64,13 +64,14 @@ dependencies {
 	// https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
 	coreImplementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
 
-	// Project Zomboid classes
-	if (project.ext.has('gameDir')) {
+	if (project.ext.has('gameDir'))
+	{
+		// Project Zomboid classes
 		zomboidImplementation files(zomboidClassesDir)
-	}
-	// Project Zomboid libraries
-	zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
 
+		// Project Zomboid libraries
+		zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
+	}
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
 	{
