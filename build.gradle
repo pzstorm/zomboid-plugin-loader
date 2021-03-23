@@ -44,4 +44,9 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
 	implementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
+
+	// Project Zomboid classes
+	if (project.ext.has('gameDir')) {
+		implementation files(zomboidClassesDir)
+	}
 }
