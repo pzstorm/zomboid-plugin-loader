@@ -34,6 +34,10 @@ repositories {
 	mavenCentral()
 }
 
+configurations {
+	implementation.extendsFrom(zomboidImplementation)
+}
+
 dependencies {
 	// https://mvnrepository.com/artifact/org.ow2.asm/asm
 	implementation group: 'org.ow2.asm', name: 'asm', version: '9.0'
@@ -52,7 +56,7 @@ dependencies {
 
 	// Project Zomboid classes
 	if (project.ext.has('gameDir')) {
-		implementation files(zomboidClassesDir)
+		zomboidImplementation files(zomboidClassesDir)
 	}
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
