@@ -17,3 +17,17 @@ else if (!propertiesFile.createNewFile()) {
 	throw new GradleException('Unable to create local.properties file in root directory')
 }
 else logger.warn('WARN: Empty local properties file created')
+
+// directory containing a copy of Project Zomboid classes
+project.ext.zomboidClassesDir = file("$buildDir/classes/zomboid").absoluteFile
+
+task zomboidClasses(type: Sync) {
+	description 'Assembles zomboid classes.'
+	group 'zomboid'
+	includeEmptyDirs false
+	from project.ext.gameDir
+	include '**/*.class'
+	into zomboidClassesDir
+}
+compileJava.dependsOn(zomboidClasses)
+classes.dependsOn(zomboidClasses)
