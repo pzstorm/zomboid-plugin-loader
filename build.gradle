@@ -37,7 +37,7 @@ repositories {
 configurations {
 	runtimeOnly.extendsFrom(zomboidRuntimeOnly)
 	implementation.extendsFrom(coreImplementation, zomboidImplementation)
-	provided.extendsFrom(zomboidImplementat, zomboidRuntimeOnly)
+	provided.extendsFrom(zomboidImplementation, zomboidRuntimeOnly)
 }
 
 dependencies {
