@@ -36,6 +36,7 @@ repositories {
 
 configurations {
 	implementation.extendsFrom(zomboidImplementation)
+	runtimeOnly.extendsFrom(zomboidRuntimeOnly)
 }
 
 dependencies {
@@ -58,6 +59,9 @@ dependencies {
 	if (project.ext.has('gameDir')) {
 		zomboidImplementation files(zomboidClassesDir)
 	}
+	// Project Zomboid libraries
+	zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
+
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
 	{
