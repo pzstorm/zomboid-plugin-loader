@@ -72,6 +72,11 @@ dependencies {
 		// Project Zomboid libraries
 		zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
 	}
+	else {
+		logger.warn('WARN: Missing \'gameDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
+	}
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
 	{
@@ -80,6 +85,11 @@ dependencies {
 			coreImplementation files(toolsJar)
 		}
 		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
+	}
+	else {
+		logger.warn('WARN: Missing \'jdkDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
 	}
 }
 
