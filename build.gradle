@@ -66,7 +66,7 @@ dependencies {
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
 	{
-		def toolsJar = Paths.get(jdkDir, 'lib', 'tools.jar')
+		def toolsJar = Paths.get(jdkDir as String, 'lib', 'tools.jar')
 		if (toolsJar.toFile().exists()) {
 			coreImplementation files(toolsJar)
 		}
@@ -89,4 +89,3 @@ shadowJar {
 		)
 	}
 }
-
