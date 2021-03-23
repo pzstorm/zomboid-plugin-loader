@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 plugins {
 	// Add Java compilation, testing and bundling capabilities.
 	id 'java'
@@ -48,5 +50,14 @@ dependencies {
 	// Project Zomboid classes
 	if (project.ext.has('gameDir')) {
 		implementation files(zomboidClassesDir)
+	}
+	// tools.jar is not on JDK classpath by default
+	if (project.ext.has('jdkDir'))
+	{
+		def toolsJar = Paths.get(jdkDir, 'lib', 'tools.jar')
+		if (toolsJar.toFile().exists()) {
+			implementation files(toolsJar)
+		}
+		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
 	}
 }
