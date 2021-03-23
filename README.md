@@ -4,6 +4,8 @@ Zomboid Plugin Loader is a Project Zomboid modding tool that allows users to loa
 
 ## For developers
 
+- Go to project structure and set project SDK to version 1.8.
+
 - Create `local.properties` file in project root directory and declare the following properties:
 
 	```properties
