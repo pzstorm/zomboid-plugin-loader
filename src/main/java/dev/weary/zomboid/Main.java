@@ -1,15 +1,19 @@
 package dev.weary.zomboid;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
-import java.io.File;
-import java.lang.reflect.Field;
 
 public class Main {
     static {
-        addNativeLibraries("./natives");
-        System.loadLibrary("attach" + System.getProperty("sun.arch.data.model"));
+        loadLibraryFrom("./natives", "attach");
     }
 
     // Launched as a regular Java program
@@ -51,9 +55,7 @@ public class Main {
             VirtualMachineDescriptor vmDescriptor;
             String targetId = getArgAfterLast(args, "--pid");
             if (targetId != null) {
-                vmDescriptor = VirtualMachine.list().stream()
-                    .filter(vm -> vm.id().equals(targetId))
-                    .findFirst().orElse(null);
+                vmDescriptor = findFirstVm(vm -> vm.id().equals(targetId));
 
                 if (vmDescriptor == null) {
                     System.out.println("Can't find a VM with ID " + targetId);
@@ -63,9 +65,8 @@ public class Main {
                 }
             }
             else {
-                vmDescriptor = VirtualMachine.list().stream()
-                    .filter(vm -> vm.displayName().startsWith("zombie.gameStates.MainScreenState"))
-                    .findFirst().orElse(null);
+                // TODO: Add server signature
+                vmDescriptor = findFirstVm(vm -> vm.displayName().startsWith("zombie.gameStates.MainScreenState"));
 
                 if (vmDescriptor == null) {
                     System.out.println("Can't find a running Project Zomboid process\n");
@@ -95,7 +96,12 @@ public class Main {
                 didAttach = true;
             }
             catch (Exception e) {
-                if (!e.getMessage().equals("0")) {
+
+                // Not an error, see https://stackoverflow.com/a/54454418
+                if (e.getMessage().equals("0")) {
+                    didAttach = true;
+                }
+                else {
                     System.out.println("Can't load into VM with ID " + vmDescriptor.id() + ": " + e.getMessage());
                     e.printStackTrace();
                 }
@@ -123,6 +129,18 @@ public class Main {
         }
     }
 
+    private static VirtualMachineDescriptor findFirstVm(Predicate<VirtualMachineDescriptor> vmPredicate) {
+        VirtualMachineDescriptor vmDescriptor;
+
+        // Silence OpenJDK 11 fake exception printing to stderr
+        // TODO: Submit to https://github.com/AdoptOpenJDK/openjdk-support/issues
+        PrintStream oldPrintStream = redirectStdErr(EMPTY_STREAM);
+        vmDescriptor = VirtualMachine.list().stream().filter(vmPredicate).findFirst().orElse(null);
+        redirectStdErr(oldPrintStream);
+
+        return vmDescriptor;
+    }
+
     private static String getArgAfterLast(String[] programArgs, String argKey) {
         for (int i = programArgs.length - 1; i >= 0; i--) {
             if (programArgs[i].equals(argKey)) {
@@ -133,27 +151,37 @@ public class Main {
         return null;
     }
 
-    private static void addNativeLibraries(String relativePath) {
-        File libraryFolder = new File(relativePath);
-        if (!libraryFolder.exists()) {
-            throw new RuntimeException("Native library folder " + relativePath + " does not exist");
+    private static void loadLibraryFrom(String librariesFolderPath, String libraryName) {
+        File librariesFolder = new File(librariesFolderPath);
+        if (!librariesFolder.exists()) {
+            throw new RuntimeException("Native libraries folder " + librariesFolderPath + " does not exist");
         }
 
-        String librariesPath = libraryFolder.getAbsolutePath();
-        if (System.getProperty("java.library.path") != null) {
-            System.setProperty("java.library.path", librariesPath + System.getProperty("path.separator") + System.getProperty("java.library.path"));
-        }
-        else {
-            System.setProperty("java.library.path", librariesPath);
+        String platformName = System.mapLibraryName(libraryName);
+        File platformLibrary = new File(librariesFolder, platformName);
+        if (!platformLibrary.exists()) {
+            File[] filesWithSimilarName = librariesFolder.listFiles(file -> file.getName().contains(libraryName));
+            boolean similarLibraryExists = filesWithSimilarName != null && filesWithSimilarName.length != 0;
+            if (!similarLibraryExists) {
+                throw new RuntimeException("Native library " + platformName + " does not exist in " + librariesFolder.getPath());
+            }
+            else {
+                throw new RuntimeException("No native library " + platformName + " for this platform in " + librariesFolder.getPath() +
+                        " (found " + Arrays.stream(filesWithSimilarName).map(File::getName).collect(Collectors.joining(
+                                ", ")) + " instead)");
+            }
         }
 
-        try {
-            Field fieldSysPaths = ClassLoader.class.getDeclaredField("sys_paths");
-            fieldSysPaths.setAccessible(true);
-            fieldSysPaths.set(null, null);
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Cannot clear java.library.path cache", e);
-        }
+        System.load(platformLibrary.getAbsolutePath());
+    }
+
+    private static final PrintStream EMPTY_STREAM = new PrintStream(new OutputStream() {
+        public void write(int b) {}
+    });
+
+    private static PrintStream redirectStdErr(PrintStream newPrintStream) {
+        PrintStream oldPrintStream = System.err;
+        System.setErr(newPrintStream);
+        return oldPrintStream;
     }
 }
