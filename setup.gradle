@@ -41,8 +41,13 @@ void createRunConfig(String name, ArrayList<String> format) {
 	// translate config name to filename (similar to what IDEA is doing)
 	def filename = name.replaceAll('\\s', '_').replaceAll('[^\\w_]', '').replaceAll("__", '_')
 
+	// ensure that file parent directory exists
+	def file = file("./.idea/runConfigurations/${filename}.xml")
+	if (!file.parentFile.exists() && !file.parentFile.mkdirs()) {
+		throw new IOException('Unable to create \'.idea/runConfigurations\' directory')
+	}
 	// write xml configuration to file
-	file("./.idea/runConfigurations/${filename}.xml").withWriter {
+	file.withWriter {
 		format.each { l -> it.writeLine(l) }
 	}
 }
