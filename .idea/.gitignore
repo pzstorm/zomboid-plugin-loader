@@ -25,4 +25,5 @@
 **/libraries
 
 # Other
+/runConfigurations/
 /jarRepositories.xml
