@@ -26,7 +26,7 @@ task zomboidClasses(type: Sync) {
 	group 'zomboid'
 	includeEmptyDirs false
 	from project.ext.gameDir
-	include '**/*.class'
+	include '**/*.class', 'stdlib.lbc'
 	into zomboidClassesDir
 }
 compileJava.dependsOn(zomboidClasses)
