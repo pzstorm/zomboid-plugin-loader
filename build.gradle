@@ -64,13 +64,19 @@ dependencies {
 	// https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
 	coreImplementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
 
-	// Project Zomboid classes
-	if (project.ext.has('gameDir')) {
+	if (project.ext.has('gameDir'))
+	{
+		// Project Zomboid classes
 		zomboidImplementation files(zomboidClassesDir)
-	}
-	// Project Zomboid libraries
-	zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
 
+		// Project Zomboid libraries
+		zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
+	}
+	else {
+		logger.warn('WARN: Missing \'gameDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
+	}
 	// tools.jar is not on JDK classpath by default
 	if (project.ext.has('jdkDir'))
 	{
@@ -79,6 +85,11 @@ dependencies {
 			coreImplementation files(toolsJar)
 		}
 		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
+	}
+	else {
+		logger.warn('WARN: Missing \'jdkDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
 	}
 }
 

@@ -21,17 +21,19 @@ else logger.warn('WARN: Empty local properties file created')
 // directory containing a copy of Project Zomboid classes
 project.ext.zomboidClassesDir = file("$buildDir/classes/zomboid").absoluteFile
 
-task zomboidClasses(type: Sync) {
-	description 'Assembles zomboid classes.'
-	group 'zomboid'
-	includeEmptyDirs false
-	from project.ext.gameDir
-	include '**/*.class', 'stdlib.lbc'
-	into zomboidClassesDir
+if (project.ext.has('gameDir'))
+{
+	task zomboidClasses(type: Sync) {
+		description 'Assembles zomboid classes.'
+		group 'zomboid'
+		includeEmptyDirs false
+		from project.ext.gameDir
+		include '**/*.class', 'stdlib.lbc'
+		into zomboidClassesDir
+	}
+	compileJava.dependsOn(zomboidClasses)
+	classes.dependsOn(zomboidClasses)
 }
-compileJava.dependsOn(zomboidClasses)
-classes.dependsOn(zomboidClasses)
-
 /**
  * Create game launch run configuration.
  * @param name run configuration name
