@@ -88,4 +88,6 @@ shadowJar {
 				'Premain-Class'				: 'dev.weary.zomboid.agent.Agent'
 		)
 	}
+	// only include core components in jar
+	configurations = [ project.configurations.coreImplementation ]
 }
