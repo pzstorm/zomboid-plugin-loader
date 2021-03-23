@@ -157,18 +157,17 @@ public class Main {
             throw new RuntimeException("Native libraries folder " + librariesFolderPath + " does not exist");
         }
 
-        String platformName = System.mapLibraryName(libraryName);
-        File platformLibrary = new File(librariesFolder, platformName);
+        String platformSpecificName = System.mapLibraryName(libraryName);
+        File platformLibrary = new File(librariesFolder, platformSpecificName);
         if (!platformLibrary.exists()) {
             File[] filesWithSimilarName = librariesFolder.listFiles(file -> file.getName().contains(libraryName));
             boolean similarLibraryExists = filesWithSimilarName != null && filesWithSimilarName.length != 0;
             if (!similarLibraryExists) {
-                throw new RuntimeException("Native library " + platformName + " does not exist in " + librariesFolder.getPath());
+                throw new RuntimeException("Native library " + platformSpecificName + " does not exist in " + librariesFolder.getPath());
             }
             else {
-                throw new RuntimeException("No native library " + platformName + " for this platform in " + librariesFolder.getPath() +
-                        " (found " + Arrays.stream(filesWithSimilarName).map(File::getName).collect(Collectors.joining(
-                                ", ")) + " instead)");
+                throw new RuntimeException("No native library " + platformSpecificName + " for this platform in " + librariesFolder.getPath() +
+                    " (found " + Arrays.stream(filesWithSimilarName).map(File::getName).collect(Collectors.joining(", ")) + " instead)");
             }
         }
 
