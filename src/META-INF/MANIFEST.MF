@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Can-Redefine-Classes: true
-Can-Retransform-Classes: true
-Main-Class: dev.weary.zomboid.Main
-Agent-Class: dev.weary.zomboid.agent.Agent
-Premain-Class: dev.weary.zomboid.agent.Agent
