@@ -56,7 +56,7 @@ void createRunConfig(String name, ArrayList<String> format) {
 	}
 }
 
-tasks.register('generateLaunchRunConfigs') {
+tasks.register('createLaunchRunConfigs') {
 
 	it.description 'Create launch run configurations.'
 	it.group 'build setup'
