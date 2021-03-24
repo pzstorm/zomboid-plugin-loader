@@ -98,3 +98,24 @@ tasks.register('createLaunchRunConfigs') {
 			'</component>'
 	])
 }
+
+tasks.register('createDiscordIntegration') {
+
+	it.description 'Show IDEA project in Discord via rich presence.'
+	it.group 'build setup'
+
+	def format = [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<project version="4">',
+			'	<component name="DiscordProjectSettings">',
+			'		<option name="show" value="PROJECT" />',
+			'		<option name="nameOverrideEnabled" value="true" />',
+			'		<option name="nameOverrideText" value="Zomboid Plugin Loader" />',
+			'		<option name="description" value="Loader for Java mods" />',
+			'	</component>',
+			'</project>'
+	]
+	file("./.idea/discord.xml").withWriter {
+		format.each { l -> it.writeLine(l) }
+	}
+}
