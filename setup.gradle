@@ -56,7 +56,7 @@ void createRunConfig(String name, ArrayList<String> format) {
 	}
 }
 
-tasks.register('createLaunchRunConfigs') {
+def createLaunchRunConfigs = tasks.register('createLaunchRunConfigs') {
 
 	it.description 'Create launch run configurations.'
 	it.group 'build setup'
@@ -99,7 +99,7 @@ tasks.register('createLaunchRunConfigs') {
 	])
 }
 
-tasks.register('createDiscordIntegration') {
+def createDiscordIntegration = tasks.register('createDiscordIntegration') {
 
 	it.description 'Show IDEA project in Discord via rich presence.'
 	it.group 'build setup'
@@ -118,4 +118,12 @@ tasks.register('createDiscordIntegration') {
 	file("./.idea/discord.xml").withWriter {
 		format.each { l -> it.writeLine(l) }
 	}
+}
+
+tasks.register('setupWorkspace') {
+
+	it.description 'Setup your local workspace.'
+	it.group 'build setup'
+
+	it.dependsOn(createLaunchRunConfigs, createDiscordIntegration)
 }
