@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 Properties localProperties = new Properties()
 project.ext.localProperties = localProperties
 
@@ -62,7 +64,8 @@ tasks.register('generateLaunchRunConfigs') {
 	it.onlyIf {
 		project.ext.has('gameDir')
 	}
-	def agentJarPath = "${buildDir}/libs/${rootProject.name}-${rootProject.version}-agent.jar"
+	String jarName = "${rootProject.name}-${rootProject.version}-agent.jar"
+	def agentJarPath = Paths.get(buildDir.path, 'libs', jarName).toString()
 	createRunConfig('Launch Loader', [
 			'<component name=\"ProjectRunConfigurationManager\">',
 			'	<configuration default=\"false\" name=\"Launch Loader\" type=\"Application\"' +
