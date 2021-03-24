@@ -1,0 +1,113 @@
+import java.nio.file.Paths
+
+plugins {
+	// Add Java compilation, testing and bundling capabilities.
+	id 'java'
+
+	// Apply the application plugin to add support for building a CLI application.
+	id 'application'
+
+	// Adds number of IDEA related tasks and configuration options.
+	id 'idea'
+
+	// https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow
+	id "com.github.johnrengelman.shadow" version "6.1.0"
+}
+apply from: 'setup.gradle'
+
+version '0.1.0'
+
+java {
+	toolchain {
+		// the game bytecode is compiled in Java 8
+		languageVersion.set(JavaLanguageVersion.of(8))
+		vendor = JvmVendorSpec.ADOPTOPENJDK
+	}
+}
+
+idea {
+	module {
+		inheritOutputDirs = false
+		outputDir = file('build/production/classes')
+		testOutputDir = file('build/test/classes')
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	// dependencies to include only during runtime
+	runtimeOnly.extendsFrom(zomboidRuntimeOnly)
+
+	// dependencies to include during compile and runtime
+	implementation.extendsFrom(coreImplementation, zomboidImplementation)
+
+	// dependencies to exclude during runtime
+	provided.extendsFrom(zomboidImplementation, zomboidRuntimeOnly)
+}
+
+dependencies {
+	// https://mvnrepository.com/artifact/org.ow2.asm/asm
+	coreImplementation group: 'org.ow2.asm', name: 'asm', version: '9.0'
+
+	// https://mvnrepository.com/artifact/org.ow2.asm/asm-tree
+	coreImplementation group: 'org.ow2.asm', name: 'asm-tree', version: '9.0'
+
+	// https://mvnrepository.com/artifact/org.ow2.asm/asm-util
+	coreImplementation group: 'org.ow2.asm', name: 'asm-util', version: '9.0'
+
+	// https://mvnrepository.com/artifact/org.ow2.asm/asm-analysis
+	coreImplementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.0'
+
+	// https://mvnrepository.com/artifact/io.github.java-diff-utils/java-diff-utils
+	coreImplementation group: 'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.9'
+
+	if (project.ext.has('gameDir'))
+	{
+		// Project Zomboid classes
+		zomboidImplementation files(zomboidClassesDir)
+
+		// Project Zomboid libraries
+		zomboidRuntimeOnly fileTree(dir: gameDir, include: ['*.jar'])
+	}
+	else {
+		logger.warn('WARN: Missing \'gameDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
+	}
+	// tools.jar is not on JDK classpath by default
+	if (project.ext.has('jdkDir'))
+	{
+		def toolsJar = Paths.get(jdkDir as String, 'lib', 'tools.jar')
+		if (toolsJar.toFile().exists()) {
+			coreImplementation files(toolsJar)
+		}
+		else logger.error("Unable to find tools.jar in JDK directory (${toolsJar.toString()})")
+	}
+	else {
+		logger.warn('WARN: Missing \'jdkDir\' property in \'local.properties\'')
+		logger.warn('WARN: Read project documentation for more information:')
+		logger.warn("WARN: ${projectRepo}/tree/dev#for-developers")
+	}
+}
+
+application {
+	// Main-Class manifest attribute
+	mainClassName = 'dev.weary.zomboid.Main'
+}
+
+shadowJar {
+	archiveClassifier.set('agent')
+	manifest {
+		attributes(
+				'Can-Redefine-Classes'		: 'true',
+				'Can-Retransform-Classes'	: 'true',
+				'Agent-Class'				: 'dev.weary.zomboid.agent.Agent',
+				'Premain-Class'				: 'dev.weary.zomboid.agent.Agent'
+		)
+	}
+	// only include core components in jar
+	configurations = [ project.configurations.coreImplementation ]
+}

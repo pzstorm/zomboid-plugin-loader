@@ -1,0 +1,97 @@
+Properties localProperties = new Properties()
+project.ext.localProperties = localProperties
+
+def propertiesFile = rootDir.toPath().resolve('local.properties').toFile()
+if (propertiesFile.exists())
+{
+	propertiesFile.withDataInputStream {
+		localProperties.load(it)
+	}
+	localProperties.entrySet().each {
+		String[] property = [ it.getKey(), it.getValue() ]
+		project.ext.setProperty(property[0], property[1])
+		logger.info("Added project property ${property[0]}:${property[1]}")
+	}
+}
+else if (!propertiesFile.createNewFile()) {
+	throw new GradleException('Unable to create local.properties file in root directory')
+}
+else logger.warn('WARN: Empty local properties file created')
+
+// directory containing a copy of Project Zomboid classes
+project.ext.zomboidClassesDir = file("$buildDir/classes/zomboid").absoluteFile
+
+if (project.ext.has('gameDir'))
+{
+	task zomboidClasses(type: Sync) {
+		description 'Assembles zomboid classes.'
+		group 'zomboid'
+		includeEmptyDirs false
+		from project.ext.gameDir
+		include '**/*.class', 'stdlib.lbc'
+		into zomboidClassesDir
+	}
+	compileJava.dependsOn(zomboidClasses)
+	classes.dependsOn(zomboidClasses)
+}
+/**
+ * Create game launch run configuration.
+ * @param name run configuration name
+ */
+void createRunConfig(String name, ArrayList<String> format) {
+
+	// translate config name to filename (similar to what IDEA is doing)
+	def filename = name.replaceAll('\\s', '_').replaceAll('[^\\w_]', '').replaceAll("__", '_')
+
+	// ensure that file parent directory exists
+	def file = file("./.idea/runConfigurations/${filename}.xml")
+	if (!file.parentFile.exists() && !file.parentFile.mkdirs()) {
+		throw new IOException('Unable to create \'.idea/runConfigurations\' directory')
+	}
+	// write xml configuration to file
+	file.withWriter {
+		format.each { l -> it.writeLine(l) }
+	}
+}
+
+tasks.register('generateLaunchRunConfigs') {
+
+	it.description 'Create launch run configurations.'
+	it.group 'build setup'
+
+	it.onlyIf {
+		project.ext.has('gameDir')
+	}
+	def agentJarPath = "${buildDir}/libs/${rootProject.name}-${rootProject.version}-agent.jar"
+	createRunConfig('Launch Loader', [
+			'<component name=\"ProjectRunConfigurationManager\">',
+			'	<configuration default=\"false\" name=\"Launch Loader\" type=\"Application\"' +
+					' factoryName=\"Application\">',
+			'		<option name=\"MAIN_CLASS_NAME\" value=\"dev.weary.zomboid.Main\" />',
+			"		<module name=\"${rootProject.name}.main\" />",
+			"		<option name=\"PROGRAM_PARAMETERS\" value=\"--agent ${agentJarPath}\" />",
+			'		<method v=\"2\">',
+			'			<option name=\"Make\" enabled=\"true\" />',
+			'		</method>',
+			'	</configuration>',
+			'</component>'
+	])
+	def zomboidVmParams = [
+			'-Ddebug=0', '-Dzomboid.steam=1', '-Dzomboid.znetlog=1',
+			'-XX:+UseConcMarkSweepGC', '-XX:-CreateMinidumpOnCrash',
+			'-XX:-OmitStackTraceInFastThrow -Xms1800m -Xmx2048m'
+	]
+	createRunConfig('Launch Zomboid', [
+			'<component name="ProjectRunConfigurationManager">',
+			'	<configuration default="false" name="Launch Zomboid" type="Application" factoryName="Application">',
+			'		<option name="MAIN_CLASS_NAME" value="zombie.gameStates.MainScreenState" />',
+			"		<module name=\"${rootProject.name}.main\" />",
+			"		<option name=\"VM_PARAMETERS\" value=\"${zomboidVmParams.join(' ')}\" />",
+			"		<option name=\"WORKING_DIRECTORY\" value=\"${gameDir}\" />",
+			'		<method v=\"2\">',
+			'			<option name=\"Make\" enabled=\"true\" />',
+			'		</method>',
+  			'	</configuration>',
+			'</component>'
+	])
+}
