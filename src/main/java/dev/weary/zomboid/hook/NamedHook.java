@@ -1,9 +1,6 @@
 package dev.weary.zomboid.hook;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -18,7 +15,7 @@ public class NamedHook {
 
 	private final String hookName;
 	private final String methodName;
-	private final MethodHandle methodHandle;
+	private final CallSite callSite;
 
 	public String getHookName() {
 		return hookName;
@@ -28,14 +25,32 @@ public class NamedHook {
 		return methodName;
 	}
 
-	public MethodHandle getMethodHandle() {
-		return methodHandle;
+	public CallSite getCallSite() {
+		return callSite;
 	}
 
-	private NamedHook(String hookName, String methodName, MethodHandle methodHandle) {
+	private static final MethodHandle unusedCallSite;
+	static {
+		MethodHandle tempCallSite = null;
+		try {
+			tempCallSite = MethodHandles.lookup().findStatic(NamedHook.class, "unusedCallSite", MethodType.methodType(Void.TYPE));
+		}
+		catch (Exception ignored) {}
+		unusedCallSite = tempCallSite;
+	}
+
+	public static void unusedCallSite() {
+		System.out.println("** This call site has been removed **");
+	}
+
+	public void resetHook() {
+		this.callSite.setTarget(unusedCallSite);
+	}
+
+	private NamedHook(String hookName, String methodName, CallSite callSite) {
 		this.hookName = hookName;
 		this.methodName = methodName;
-		this.methodHandle = methodHandle;
+		this.callSite = callSite;
 	}
 
 	public static NamedHook fromMethod(Class<? extends ZomboidPlugin> pluginClass, Method hookMethod) {
@@ -57,7 +72,7 @@ public class NamedHook {
 			throw new RuntimeException("Couldn't lookup hook method " + hookMethod.getName() + " in class " + pluginClass.getSimpleName(), e);
 		}
 
-		return new NamedHook(hookInfo.value(), hookMethod.getName(), methodHandle);
+		return new NamedHook(hookInfo.value(), hookMethod.getName(), new MutableCallSite(methodHandle));
 	}
 
 	public static List<NamedHook> fromClass(Class<? extends ZomboidPlugin> pluginClass) {

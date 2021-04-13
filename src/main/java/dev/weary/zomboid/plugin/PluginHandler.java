@@ -32,6 +32,7 @@ import java.util.*;
 import dev.weary.zomboid.hook.NamedHook;
 import dev.weary.zomboid.util.reflect.ReflectionUtil;
 
+
 public class PluginHandler {
     private final Instrumentation instrumentation;
     private final List<ZomboidPlugin> loadedPlugins = new ArrayList<>();
@@ -216,6 +217,7 @@ public class PluginHandler {
             pluginClassNameToId.remove(plugin.getClass());
 
             // Remove plugin hooks
+            allPluginHooks.get(plugin.pluginId).forEach(NamedHook::resetHook);
             allPluginHooks.get(plugin.pluginId).clear();
             allPluginHooks.remove(plugin.pluginId);
 
@@ -230,7 +232,6 @@ public class PluginHandler {
             // Clear transformer references
             plugin.affectedClasses.clear();
             plugin.classTransformers.clear();
-
         }
     }
 

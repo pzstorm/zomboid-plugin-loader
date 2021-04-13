@@ -47,7 +47,7 @@ public abstract class ZomboidPlugin {
         classTransformers.add(classTransformer);
     }
 
-    public final ClassDefinition[] getClassDefinitions() {
+    final ClassDefinition[] getClassDefinitions() {
         if (affectedClasses.size() == 0) {
             return null;
         }
@@ -55,7 +55,7 @@ public abstract class ZomboidPlugin {
         return affectedClasses.stream().distinct().toArray(ClassDefinition[]::new);
     }
 
-    public final Class<?>[] getAffectedClasses() {
+    final Class<?>[] getAffectedClasses() {
         if (affectedClasses.size() == 0) {
             return null;
         }
@@ -63,7 +63,7 @@ public abstract class ZomboidPlugin {
         return affectedClasses.stream().map(ClassDefinition::getDefinitionClass).distinct().toArray(Class[]::new);
     }
 
-    public final Set<ClassTransformer> getClassTransformers() {
+    final Set<ClassTransformer> getClassTransformers() {
         return classTransformers;
     }
 

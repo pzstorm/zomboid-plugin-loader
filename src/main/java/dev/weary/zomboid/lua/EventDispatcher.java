@@ -47,7 +47,7 @@ public class EventDispatcher {
     public static boolean shouldTriggerEvent(LuaClosure callback, Event event, Object[] args) {
         LuaEvent luaEvent = new LuaEvent(event, callback, args);
         for (ZomboidPlugin plugin: pluginHandler.getLoadedPlugins()) {
-            plugin.onLuaEvent(luaEvent);
+            // plugin.onLuaEvent(luaEvent);
         }
 
         if (args != null) {

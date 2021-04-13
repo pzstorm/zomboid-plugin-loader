@@ -1,7 +1,6 @@
 package dev.weary.zomboid.hook;
 
 import java.lang.invoke.CallSite;
-import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
@@ -29,7 +28,7 @@ public class PluginHook {
 
 	public static CallSite bootstrap(MethodHandles.Lookup caller, String name, MethodType type, String pluginId, String hookName) throws NoSuchMethodException, IllegalAccessException {
 		NamedHook namedHook = Agent.getPluginManager().getPluginHook(pluginId, hookName);
-		return new ConstantCallSite(namedHook.getMethodHandle());
+		return namedHook.getCallSite();
 	}
 
 	public static InvokeDynamicInsnNode getInvokeInsn(Class<? extends ZomboidPlugin> pluginClass, String hookName) {
@@ -41,7 +40,7 @@ public class PluginHook {
 
 		return new InvokeDynamicInsnNode(
 			namedHook.getMethodName(),
-			namedHook.getMethodHandle().type().toMethodDescriptorString(),
+			namedHook.getCallSite().type().toMethodDescriptorString(),
 			BOOTSTRAP_HANDLE,
 			pluginId, namedHook.getHookName()
 		);
