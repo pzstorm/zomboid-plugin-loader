@@ -1,5 +1,6 @@
 package dev.weary.zomboid.agent;
 
+import dev.weary.zomboid.hook.NamedHook;
 import dev.weary.zomboid.lua.EventDispatcher;
 import dev.weary.zomboid.plugin.PluginHandler;
 import dev.weary.zomboid.plugin.ZomboidPlugin;
@@ -14,6 +15,14 @@ public class PluginManager {
     public PluginManager(Instrumentation instrumentation) {
         this.pluginHandler = new PluginHandler(instrumentation);
         this.eventDispatcher = new EventDispatcher(instrumentation, pluginHandler);
+    }
+
+    public NamedHook getPluginHook(String pluginId, String hookName) {
+        return pluginHandler.getNamedHook(pluginId, hookName);
+    }
+
+    public String getPluginId(Class<? extends ZomboidPlugin> pluginClass) {
+        return pluginHandler.getPluginId(pluginClass);
     }
 
     ZomboidPlugin loadPlugin(File pluginJar) {

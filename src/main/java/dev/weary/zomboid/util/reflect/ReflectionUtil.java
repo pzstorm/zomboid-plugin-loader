@@ -16,6 +16,16 @@ public class ReflectionUtil {
         }
     }
 
+    public static void setValue(Object targetObject, Field targetField, Object objectValue) {
+        try {
+            targetField.set(targetObject, objectValue);
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Couldn't write field " + targetField.getName() + " of class " + targetField.getDeclaringClass().getName(), e);
+        }
+    }
+
+
     public static Object getValue(Object targetObject, Field targetField) {
         try {
             return targetField.get(targetObject);

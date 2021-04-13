@@ -9,9 +9,16 @@ import java.util.Set;
 public abstract class ZomboidPlugin {
     String pluginId;
     boolean isEnabled;
+    PluginClassLoader classLoader;
 
-    private final Set<ClassTransformer> classTransformers = new HashSet<>();
-    private final Set<ClassDefinition> affectedClasses = new HashSet<>();
+    @Override
+    protected void finalize() throws Throwable {
+        System.out.println("** ZomboidPlugin is finalizing!");
+        super.finalize();
+    }
+
+    final Set<ClassTransformer> classTransformers = new HashSet<>();
+    final Set<ClassDefinition> affectedClasses = new HashSet<>();
 
     public void onEnable() {}
     public void onDisable() {}
@@ -23,8 +30,20 @@ public abstract class ZomboidPlugin {
         classTransformers.add(classTransformer);
     }
 
-    public final Set<ClassDefinition> getAffectedClasses() {
-        return affectedClasses;
+    public final ClassDefinition[] getClassDefinitions() {
+        if (affectedClasses.size() == 0) {
+            return null;
+        }
+
+        return affectedClasses.stream().distinct().toArray(ClassDefinition[]::new);
+    }
+
+    public final Class<?>[] getAffectedClasses() {
+        if (affectedClasses.size() == 0) {
+            return null;
+        }
+
+        return affectedClasses.stream().map(ClassDefinition::getDefinitionClass).distinct().toArray(Class[]::new);
     }
 
     public final Set<ClassTransformer> getClassTransformers() {
@@ -33,5 +52,9 @@ public abstract class ZomboidPlugin {
 
     public final String getPluginId() {
         return pluginId;
+    }
+
+    public final boolean isEnabled() {
+        return isEnabled;
     }
 }

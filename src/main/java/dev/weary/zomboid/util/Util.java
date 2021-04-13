@@ -24,6 +24,16 @@ public class Util {
     private static final Printer asmPrinter = new Textifier();
     private static final TraceMethodVisitor methodPrinter = new TraceMethodVisitor(asmPrinter);
 
+    public static String getArgAfterLast(String[] programArgs, String argKey) {
+        for (int i = programArgs.length - 1; i >= 0; i--) {
+            if (programArgs[i].equals(argKey)) {
+                return i + 1 < programArgs.length ? programArgs[i + 1] : "";
+            }
+        }
+
+        return null;
+    }
+
     public static String printNode(AbstractInsnNode insnNode) {
         insnNode.accept(methodPrinter);
         StringWriter stringWriter = new StringWriter();
@@ -174,23 +184,47 @@ public class Util {
     }
 
     private static byte[] getBytesFromClass(Class<?> clazz) {
-        try {
-            return getBytesFromInputStream(clazz.getClassLoader().getResourceAsStream(clazz.getName().replace('.', '/') + ".class"));
-        }
-        catch (Exception ignored) {}
-        return null;
+        String classFile = clazz.getName().replace('.', '/') + ".class";
+        InputStream inputStream = clazz.getClassLoader().getResourceAsStream(classFile);
+        return readStreamAndClose(inputStream);
     }
 
-    private static byte[] getBytesFromInputStream(InputStream stream) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] data = new byte[16384];
-        int size;
-
-        while ((size = stream.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, size);
+    public static byte[] readStreamAndClose(InputStream inputStream) {
+        try {
+            return readStream(inputStream);
         }
+        finally {
+            closeStream(inputStream);
+        }
+    }
 
-        buffer.flush();
-        return buffer.toByteArray();
+    private static byte[] readStream(InputStream inputStream) {
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] readBuffer = new byte[16384];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(readBuffer, 0, readBuffer.length)) > -1) {
+                outputStream.write(readBuffer, 0, bytesRead);
+            }
+
+            return outputStream.toByteArray();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void closeStream(Closeable stream) {
+        if (stream != null) {
+            try {
+                if (stream instanceof Flushable) {
+                    ((Flushable) stream).flush();
+                }
+
+                stream.close();
+            }
+            catch (Exception ignored) {}
+        }
     }
 }

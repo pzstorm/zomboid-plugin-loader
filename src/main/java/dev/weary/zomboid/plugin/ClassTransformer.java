@@ -67,6 +67,7 @@ public class ClassTransformer implements ClassFileTransformer {
                 // Write the class
                 ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
                 classNode.accept(classWriter);
+
                 byte[] newByteCode = classWriter.toByteArray();
                 Util.verifyClass(newByteCode);
 

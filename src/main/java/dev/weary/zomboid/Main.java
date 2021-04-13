@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
 
+import static dev.weary.zomboid.util.Util.getArgAfterLast;
 
 public class Main {
     static {
@@ -92,7 +93,9 @@ public class Main {
             }
 
             try {
-                targetVm.loadAgent(thisJar.getAbsolutePath(), "");
+                String agentOpts = String.format("--this-jar %s --plugins-dir %s", thisJar.getAbsolutePath(),
+                        new File("C:\\Work\\pz-modding\\sample-plugin").getAbsolutePath());
+                targetVm.loadAgent(thisJar.getAbsolutePath(), agentOpts);
                 didAttach = true;
             }
             catch (Exception e) {
@@ -139,16 +142,6 @@ public class Main {
         redirectStdErr(oldPrintStream);
 
         return vmDescriptor;
-    }
-
-    private static String getArgAfterLast(String[] programArgs, String argKey) {
-        for (int i = programArgs.length - 1; i >= 0; i--) {
-            if (programArgs[i].equals(argKey)) {
-                return i + 1 < programArgs.length ? programArgs[i + 1] : "";
-            }
-        }
-
-        return null;
     }
 
     private static void loadLibraryFrom(String librariesFolderPath, String libraryName) {
