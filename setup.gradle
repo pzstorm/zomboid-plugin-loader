@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 Properties localProperties = new Properties()
 project.ext.localProperties = localProperties
 
@@ -54,7 +56,7 @@ void createRunConfig(String name, ArrayList<String> format) {
 	}
 }
 
-tasks.register('generateLaunchRunConfigs') {
+def createLaunchRunConfigs = tasks.register('createLaunchRunConfigs') {
 
 	it.description 'Create launch run configurations.'
 	it.group 'build setup'
@@ -62,7 +64,8 @@ tasks.register('generateLaunchRunConfigs') {
 	it.onlyIf {
 		project.ext.has('gameDir')
 	}
-	def agentJarPath = "${buildDir}/libs/${rootProject.name}-${rootProject.version}-agent.jar"
+	String jarName = "${rootProject.name}-${rootProject.version}-agent.jar"
+	def agentJarPath = Paths.get(buildDir.path, 'libs', jarName).toString()
 	createRunConfig('Launch Loader', [
 			'<component name=\"ProjectRunConfigurationManager\">',
 			'	<configuration default=\"false\" name=\"Launch Loader\" type=\"Application\"' +
@@ -94,4 +97,33 @@ tasks.register('generateLaunchRunConfigs') {
   			'	</configuration>',
 			'</component>'
 	])
+}
+
+def createDiscordIntegration = tasks.register('createDiscordIntegration') {
+
+	it.description 'Show IDEA project in Discord via rich presence.'
+	it.group 'build setup'
+
+	def format = [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<project version="4">',
+			'	<component name="DiscordProjectSettings">',
+			'		<option name="show" value="PROJECT" />',
+			'		<option name="nameOverrideEnabled" value="true" />',
+			'		<option name="nameOverrideText" value="Zomboid Plugin Loader" />',
+			'		<option name="description" value="Loader for Java mods" />',
+			'	</component>',
+			'</project>'
+	]
+	file("./.idea/discord.xml").withWriter {
+		format.each { l -> it.writeLine(l) }
+	}
+}
+
+tasks.register('setupWorkspace') {
+
+	it.description 'Setup your local workspace.'
+	it.group 'build setup'
+
+	it.dependsOn(createLaunchRunConfigs, createDiscordIntegration)
 }

@@ -13,6 +13,6 @@ Zomboid Plugin Loader is a Project Zomboid modding tool that allows users to loa
 	jdkDir=<absolute_path_to_jdk_8_dir>
 	```
 
-- Run `generateLaunchRunConfigs` to generate run configurations.
+- Run `setupWorkspace` to setup everything you need.
 
 - Run `shadowJar` to generate the **agent** jar used by the loader.
